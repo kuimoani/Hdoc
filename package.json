@@ -1,0 +1,19 @@
+{
+  "name": "ckeditor_offline",
+  "productName": "ckeditor_offline",
+  "version": "0.1.1",
+  "description": "CKEditor Offline Application",
+  "author": "https://github.com/kuimoani",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . --overwrite --asar --platform=win32 --arch=x64 --icon=./icons/app.ico --prune --out=dist --version-string.CompanyName=kuimoani --version-string.FileDescription=CKEditor --version-string.ProductName=\"CKEditor Offline App\""
+  },
+  "dependencies": {
+    "jquery": "^3.2.1"
+  },
+  "devDependencies": {
+    "electron": "^1.6.10",
+    "electron-packager": "^8.7.0"
+  }
+}

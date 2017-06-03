@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <!--<meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self'; style-src 'self' 'unsafe-inline';">-->
+        <title>CKEditor Offline</title>
+        <script src="ckeditor/ckeditor.js"></script>
+        <script>window.$ = window.jQuery = require('jquery');</script>
+        <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
+        <link rel="stylesheet" href="bootstrap/css/bootstrap-theme.min.css">
+        <script src="bootstrap/js/bootstrap.min.js"></script>
+    </head>
+    <body style="background-color: #efefef;">
+        <div id="topbar" style="height: auto; cursor:default; user-select: none;">
+            <div class="btn-group btn-group-sm" role="group">
+                <button id="btnNew" type="button" class="btn btn-default"><span class="glyphicon glyphicon-file"></span> New</button>
+                <button id="btnOpen" type="button" class="btn btn-default"><span class="glyphicon glyphicon-folder-open"></span> Open</button>
+                <button id="btnSave" type="button" class="btn btn-default"><span class="glyphicon glyphicon-floppy-disk"></span> Save</button>
+                <button id="btnSaveAs" type="button" class="btn btn-default"><span class="glyphicon glyphicon-duplicate"></span> Save As</button>
+            </div>
+            <span id="label_msg" class="label label-danger"></span>
+        </div>
+
+        <form>
+            <textarea name="editor1" id="editor1" rows="100" cols="80"></textarea>
+        </form>
+
+        <div id="bottombar" style="cursor:default; user-select: none; text-align: center; font-size:8pt; color:#999999;">
+            2017 @ 
+            <script>
+                document.write("CKEditor Offline v" + require('./package.json').version);
+            </script> 
+            Made by kuimoani. Powered by ckeditor, jquery, bootstrap, electron.
+        </div>
+    </body>
+    <script>
+        //init
+        const editor = CKEDITOR.replace( 'editor1' );
+        var app = require('electron').remote; 
+        var dialog = app.dialog;
+        var fs = require('fs'); // Load the File System to execute our common tasks (CRUD)
+        var filepath;
+
+        //onload
+        $(document).ready(function(){
+            $("#btnNew").click();
+            setTimeout(function(){ $(window).resize(); }, 100); //사이즈계산 문제로 인해 딜레이 처리
+        });
+
+        //unload  창 닫을때는 electron 버그로인해 dialog를 움직인 후 no, cancle 누르면 그냥 quit으로 넘어가버림..
+        //$(window).bind("beforeunload", function(event){
+        window.onbeforeunload = (event) => {
+            if(isModified()) {
+                //if(confirm("Are you sure you want to leave? All data will be lost!") == false) {
+                //  event.returnValue = false;
+                //}
+                let choice = dialog.showMessageBox(
+                    app.getCurrentWindow(),
+                    {
+                        type: 'warning',
+                        buttons: ['Yes', 'No', 'Cancel'],
+                        defaultId: 2,
+                        cancelId: 2,
+                        title: 'Confirm',
+                        message: 'The file is not saved.\n Are you sure you want to quit?'
+                    });
+                if(choice !== 0){
+                    event.returnValue = false;
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        }
+        
+        // auto resize
+        $(window).on("resize", function(){
+            editor.resize('100%', window.innerHeight - $("#topbar").height() - $("#bottombar").height() - 1);
+        });
+
+        //new
+        $("#btnNew").click(function(){
+            if(isModified() && confirm("The file is not saved.\n Are you sure you want to clear?") == false) {
+                return false;
+            }
+
+            editor.setData("");
+            
+            setTimeout(function(){ //editor change 이벤트 때문에 delay 처리
+                filepath = null;
+                document.title = "Untitled - CKEditor Offline";
+                showMessage("New.");
+            }, 100);
+        });
+
+        //open
+        $("#btnOpen").click(function(){
+            if(isModified() && confirm("The file is not saved.\n Are you sure you want to open?") == false) {
+                return false;
+            }
+
+            dialog.showOpenDialog({
+                        filters: [{
+                        name: 'HTML',
+                        extensions: ['html', 'htm']
+                        }]
+                    }, (fileNames) => {
+                    // fileNames is an array that contains all the selected
+                    if(fileNames === undefined){
+                        console.log("No file selected");
+                        return;
+                    }
+
+                    openfile(fileNames[0]);
+                });
+        });
+
+        //open file
+        function openfile(filename)
+        {
+            fs.readFile(filename, 'utf-8', (err, data) => {
+                if(err){
+                    alert("An error ocurred reading the file :" + err.message);
+                    return;
+                }
+
+                // Change how to handle the file content
+                editor.setData(data);
+                setTimeout(function(){ //editor change 이벤트 때문에 delay 처리
+                    filepath = filename;
+                    document.title = filepath + " - CKEditor Offline ";
+                    showMessage("Opened.");
+                }, 100);
+            });
+        }
+
+        //save as
+        $("#btnSaveAs").click(function(){
+            dialog.showSaveDialog({
+                    filters: [{
+                    name: 'HTML',
+                    extensions: ['html', 'htm']
+                    }]
+                }, (fileName) => {
+                if (fileName === undefined){
+                    console.log("You didn't save the file");
+                    return;
+                }
+
+                // fileName is a string that contains the path and filename created in the save file dialog.  
+                fs.writeFile(fileName, editor.getData(), (err) => {
+                    if(err){
+                        alert("An error ocurred creating the file "+ err.message)
+                    }
+
+                    filepath = fileName;                        
+                    document.title = filepath + " - CKEditor Offline ";
+                    showMessage("Saved.");
+                    document.title = document.title.replace("* ", "");
+                });
+            }); 
+        });
+
+        //save
+        $("#btnSave").click(function(){
+            if(filepath == null)
+                $("#btnSaveAs").click();
+            else{
+                fs.writeFile(filepath, editor.getData(), (err) => {
+                    if (err) {
+                        alert("An error ocurred updating the file" + err.message);
+                        console.log(err);
+                        return;
+                    }
+
+                    showMessage("Saved.");
+                    document.title = document.title.replace("* ", "");
+                });
+            }
+        });
+
+        //check text changed
+        editor.on("change", function () {
+            if(isModified() == false) {
+                showMessage("modified.", "label-danger");
+                document.title = "* " + document.title;
+            }
+        });
+
+        //show msg
+        function showMessage(msg, label_cls = "label-success")
+        {
+            $("#label_msg")
+                .hide()
+                .removeClass("label-default").removeClass("label-primary").removeClass("label-success").removeClass("label-info").removeClass("label-warning").removeClass("label-danger")
+                .addClass(label_cls)
+                .text(msg)
+                .show("fast");
+        }
+
+        //file drag-drop
+        document.ondragover = document.ondrop = (ev) => {
+            ev.preventDefault()
+        }
+        document.body.ondrop = (ev) => {
+            openfile(ev.dataTransfer.files[0].path)
+            ev.preventDefault()
+        }
+        editor.on("drop", function(evt){
+            openfile(evt.data.dataTransfer.$.files[0].path);
+        });
+
+        //is modified
+        function isModified()
+        {
+            return $("#label_msg").text() == "modified.";
+        }
+
+        //windows menu
+        require('electron').ipcRenderer.on('click_menu', function(event, message) {
+            switch(message){
+                case "new":
+                    $("#btnNew").click();
+                    break;
+                case "open":
+                    $("#btnOpen").click();
+                    break;
+                case "save":
+                    $("#btnSave").click();
+                    break;
+                case "saveas":
+                    $("#btnSaveAs").click();
+                    break;
+            }
+        });
+    </script>
+</html>

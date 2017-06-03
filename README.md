@@ -1,0 +1,2 @@
+# CKEditorOffline
+CKEditor Offline Application

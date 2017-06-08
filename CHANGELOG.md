@@ -6,12 +6,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- add github
 
 ### Changed
+- Drag&Drop으로 파일오픈시 저장되지 않은 문서 있을 경우 Confirm 창 띄우기
+- beforeunload 에서 return false(cancel)가 잘 되지 않는 버그로 인해 Atom이나 VSCode처럼 temp 저장방식으로 개선하기
+- Control+S 단축키로 저장했을 경우 "saved." 표시가 안되고 "modified."로 표시되는 문제 해결하기 (checkDirty() 활용?)
 
 ## [0.1.1] - 2017-06-04
 ### Added
+- add github
 - packaging
 - app icons : https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
 - html file drag-drop

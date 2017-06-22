@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <!--<meta http-equiv="Content-Security-Policy" content="default-src *; script-src 'self'; style-src 'self' 'unsafe-inline';">-->
-        <title>CKEditor Offline</title>
+        <title>Hdoc</title>
         <script src="ckeditor/ckeditor.js"></script>
         <script>window.$ = window.jQuery = require('jquery');</script>
         <link rel="stylesheet" href="bootstrap/css/bootstrap.min.css">
@@ -28,9 +28,9 @@
         <div id="bottombar" style="cursor:default; user-select: none; text-align: center; font-size:8pt; color:#999999;">
             2017 @ 
             <script>
-                document.write("CKEditor Offline v" + require('./package.json').version);
+                document.write("Hdoc v" + require('./package.json').version);
             </script> 
-            Made by kuimoani. Powered by ckeditor, jquery, bootstrap, electron.
+            made by kuimoani. Powered by ckeditor, jquery, bootstrap, electron.
         </div>
     </body>
     <script>
@@ -48,30 +48,33 @@
         });
 
         //unload  창 닫을때는 electron 버그로인해 dialog를 움직인 후 no, cancle 누르면 그냥 quit으로 넘어가버림..
-        //$(window).bind("beforeunload", function(event){
+        //alert,confirm이 blocking이 아닌것 같음.. preventDefault()를 기본으로 하고 응답후에 처리하는거로 하니 잘 됨
+        //confirm 창 잘 안됨... dialog.showMessageBox 으로 해야함
+        //$(window).on("beforeunload", function(event){
         window.onbeforeunload = (event) => {
             if(isModified()) {
-                //if(confirm("Are you sure you want to leave? All data will be lost!") == false) {
-                //  event.returnValue = false;
-                //}
-                let choice = dialog.showMessageBox(
+                event.preventDefault() // Prevents the window from closing 
+                event.returnValue = false;
+
+                dialog.showMessageBox(
                     app.getCurrentWindow(),
                     {
                         type: 'warning',
-                        buttons: ['Yes', 'No', 'Cancel'],
+                        buttons: ['Yes', 'No'],
                         defaultId: 2,
                         cancelId: 2,
                         title: 'Confirm',
-                        message: 'The file is not saved.\n Are you sure you want to quit?'
-                    });
-                if(choice !== 0){
-                    event.returnValue = false;
-                    event.preventDefault();
-                    return false;
-                }
+                        message: 'The file is not saved. Are you sure you want to quit?'
+                    }, function(res){
+                        if (res === 0) {
+                            editor.resetDirty();
+                            app.getCurrentWindow().close();
+                        }
+                    }
+                );
             }
         }
-        
+
         // auto resize
         $(window).on("resize", function(){
             editor.resize('100%', window.innerHeight - $("#topbar").height() - $("#bottombar").height() - 1);
@@ -79,22 +82,23 @@
 
         //new
         $("#btnNew").click(function(){
-            if(isModified() && confirm("The file is not saved.\n Are you sure you want to clear?") == false) {
+            if(isModified() && confirm("The file is not saved. Are you sure you want to clear?") == false) {
                 return false;
             }
 
-            editor.setData("");
-            
-            setTimeout(function(){ //editor change 이벤트 때문에 delay 처리
-                filepath = null;
-                document.title = "Untitled - CKEditor Offline";
-                showMessage("New.");
-            }, 100);
+            editor.setData('', {
+                callback: function () {
+                    filepath = null;
+                    document.title = "Untitled - Hdoc";
+                    showMessage("New.");
+                    editor.resetDirty();
+                }
+            });
         });
 
         //open
         $("#btnOpen").click(function(){
-            if(isModified() && confirm("The file is not saved.\n Are you sure you want to open?") == false) {
+            if(isModified() && confirm("The file is not saved. Are you sure you want to open?") == false) {
                 return false;
             }
 
@@ -124,12 +128,15 @@
                 }
 
                 // Change how to handle the file content
-                editor.setData(data);
-                setTimeout(function(){ //editor change 이벤트 때문에 delay 처리
-                    filepath = filename;
-                    document.title = filepath + " - CKEditor Offline ";
-                    showMessage("Opened.");
-                }, 100);
+                editor.setData(data, {
+                    callback: function () {
+                        filepath = filename;
+                        document.title = filepath + " - Hdoc";
+                        showMessage("Opened.");
+                        editor.resetDirty();
+                    }
+                });
+
             });
         }
 
@@ -153,9 +160,10 @@
                     }
 
                     filepath = fileName;                        
-                    document.title = filepath + " - CKEditor Offline ";
-                    showMessage("Saved.");
+                    document.title = filepath + " - Hdoc";
                     document.title = document.title.replace("* ", "");
+                    editor.resetDirty();
+                    showMessage("Saved.");
                 });
             }); 
         });
@@ -172,17 +180,24 @@
                         return;
                     }
 
-                    showMessage("Saved.");
                     document.title = document.title.replace("* ", "");
+                    editor.resetDirty();
+                    showMessage("Saved.");
                 });
             }
         });
 
-        //check text changed
+        //check text changed (첫번째 편집이 인식 안하는 경우 있음)... 
+        //성능문제로 가끔 오작동이 있다고함 http://docs.ckeditor.com/#!/api/CKEDITOR.editor-event-change
         editor.on("change", function () {
-            if(isModified() == false) {
+            if(isModified() == true && $("#label_msg").text() != "modified.") {
                 showMessage("modified.", "label-danger");
                 document.title = "* " + document.title;
+            }
+            //편집한거 다시 원상복구 했을 경우
+            else if(isModified() == false && $("#label_msg").text() != "reverted.") {
+                showMessage("reverted.", "label-info");
+                document.title = document.title.replace("* ", "");
             }
         });
 
@@ -190,6 +205,8 @@
         function showMessage(msg, label_cls = "label-success")
         {
             $("#label_msg")
+                //.clearQueue()
+                //.stop()
                 .hide()
                 .removeClass("label-default").removeClass("label-primary").removeClass("label-success").removeClass("label-info").removeClass("label-warning").removeClass("label-danger")
                 .addClass(label_cls)
@@ -202,17 +219,24 @@
             ev.preventDefault()
         }
         document.body.ondrop = (ev) => {
-            openfile(ev.dataTransfer.files[0].path)
-            ev.preventDefault()
+            if(isModified() && confirm("The file is not saved. Are you sure you want to open?") == false) {
+                return false;
+            }
+            openfile(ev.dataTransfer.files[0].path);
+            ev.preventDefault();
         }
         editor.on("drop", function(evt){
+            if(isModified() && confirm("The file is not saved. Are you sure you want to open?") == false) {
+                return false;
+            }
             openfile(evt.data.dataTransfer.$.files[0].path);
         });
 
         //is modified
         function isModified()
         {
-            return $("#label_msg").text() == "modified.";
+            //return $("#label_msg").text() == "modified.";
+            return editor.checkDirty();
         }
 
         //windows menu

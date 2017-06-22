@@ -1,7 +1,7 @@
 # Hdoc
-Offline HTML Wordprocessor
+HTML Wordprocessor
 =======
-- Offline WYSIWYG HTML Editor
+- WYSIWYG HTML Editor
 - Electron based
 - CKEditor
 - Bootstrap

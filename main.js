@@ -133,7 +133,7 @@ const template = [
     submenu: [
       {
         label: 'About Hdoc',
-        click () { require('electron').shell.openExternal('https://github.com/kuimoani/CKEditorOffline') }
+        click () { require('electron').shell.openExternal('https://github.com/kuimoani/Hdoc') }
       }
     ]
   }

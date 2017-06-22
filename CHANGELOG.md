@@ -6,12 +6,25 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
-- add github
+- Image Embeded Save 기능 추가
 
 ### Changed
 
+
+## [0.1.2] - 2017-06-22
+### Added
+
+### Changed
+- build script 수정 - electron-package 8.7.1 버전에 맞게 수정
+- editor change event 문제 때문에 setTimeout 쓴 코드 정리
+- beforeunload 에서 return false(cancel)가 잘 되지 않는 버그로 인해 Atom이나 VSCode처럼 temp 저장방식으로 개선하기 -> win.close 이벤트에서 dialog 띄우는 방식으로 해결
+- Control+S 단축키로 저장했을 경우 "saved." 표시가 안되고 "modified."로 표시되는 문제 해결하기 (checkDirty() 활용?)
+- Drag&Drop으로 파일오픈시 저장되지 않은 문서 있을 경우 Confirm 창 띄우기
+- CKEditor -> HDoc 으로 이름 전환
+
 ## [0.1.1] - 2017-06-04
 ### Added
+- add github
 - packaging
 - app icons : https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
 - html file drag-drop
@@ -34,16 +47,3 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - bootstrap local install
-
-
-[Unreleased]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.3.0...HEAD
-[0.3.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.2.0...v0.3.0
-[0.2.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.1.0...v0.2.0
-[0.1.0]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.8...v0.1.0
-[0.0.8]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.7...v0.0.8
-[0.0.7]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.6...v0.0.7
-[0.0.6]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.5...v0.0.6
-[0.0.5]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.4...v0.0.5
-[0.0.4]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.3...v0.0.4
-[0.0.3]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.2...v0.0.3
-[0.0.2]: https://github.com/olivierlacan/keep-a-changelog/compare/v0.0.1...v0.0.2

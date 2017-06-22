@@ -10,7 +10,7 @@ function createWindow () {
   // Create the browser window.
   win = new BrowserWindow({
     width: 800, height: 600,
-    title: "CKEditor Offline",
+    title: "Hdoc",
     webPreferences: {
       backgroundThrottling: false
     },
@@ -57,8 +57,6 @@ app.on('activate', () => {
     createWindow()
   }
 })
-
-
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and require them here.
@@ -134,8 +132,8 @@ const template = [
     role: 'help',
     submenu: [
       {
-        label: 'About',
-        click () { require('electron').shell.openExternal('https://electron.atom.io') }
+        label: 'About Hdoc',
+        click () { require('electron').shell.openExternal('https://github.com/kuimoani/CKEditorOffline') }
       }
     ]
   }

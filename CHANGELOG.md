@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 
+## [0.1.3] - 2017-06-23
+### Added
+- Google Analytics 추가 -> GA는 Domain이 필수이므로 Firebase로 대체 -> Firebase는 거의 대부분 기능을 iOS와 Android만 지원... -> 다시 GA로.. 알아보니 도메인은 대충 적어도 된다고 함(참고:http://shibe97.hatenablog.com/entry/2017/01/17/094404, https://github.com/expo/electron-cookies)
+
+### Changed
+- document ready 대신 CKEDITOR.instanceReady 에서 window resize 하는 방식으로 개선
+- 파일 New, Open시 ckeditor undo 히스토리 삭제
+- File Open & Save Dialog를 Modal Window로 수정
 
 ## [0.1.2] - 2017-06-22
 ### Added

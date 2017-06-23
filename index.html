@@ -35,6 +35,7 @@
     </body>
     <script>
         //init
+        CKEDITOR.config.allowedContent = true;  //for adding video
         const editor = CKEDITOR.replace( 'editor1' );
         var app = require('electron').remote; 
         var dialog = app.dialog;
@@ -237,11 +238,26 @@
             openfile(ev.dataTransfer.files[0].path);
             ev.preventDefault();
         }
-        editor.on("drop", function(evt){
-            if(isModified() && confirm("The file is not saved. Are you sure you want to open?") == false) {
-                return false;
+        var tt;
+        editor.on("drop", function(ev){
+            //file이 아닌 html dom을 move할 경우는 pass
+            if(ev.data.dataTransfer.$.files.length == 0)
+                return ev;
+
+            //drop file to html element
+            let file = ev.data.dataTransfer.$.files[0];
+            switch(file.type.split("/")[0]){
+                /*case "video":
+                    editor.insertHtml('<video width=100% controls><source src="' + file.path + '" type="' + file.type + '">Your browser does not support the video tag.</video>', "video", ev.data.dropRange);
+                    break;*/
+                case "image":
+                    editor.insertHtml("<image src='" + file.path + "' />", "image", ev.data.dropRange);
+                    break;
+                default:
+                    editor.insertHtml("<a href='" + file.path + "'>" + file.path + "</a>", "link", ev.data.dropRange);
+                    break;
             }
-            openfile(evt.data.dataTransfer.$.files[0].path);
+            console.log(file);
         });
 
         //is modified

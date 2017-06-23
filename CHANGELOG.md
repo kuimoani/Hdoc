@@ -4,9 +4,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [TODO]
+### Add
+- Image Embeded 전환 기능 추가
+  - ckeditor image dialog 커스터마이징?
+  - image 선택시 전환여부 물어보는 레이어 창 띄우기?
+  - 상단 메뉴나 아이콘버튼 만들어서 image 선택시 활성화 되게?
+- images, video, link files Insert/DragDrop 기능 추가
+  - 절대경로? 이미지 파일을 이동할 경우 짤림..여기저기 복사할때 문제됨
+  - 상대경로? new file일때 상대경로로 할 수가 없음... 파일 삽입하면 강제저장하거나 일단 절대경로로 보여줬다가 저장할때 상대경로로?? html 직접 편집하는거면 일관성 없음
+  - video는 http://ckeditor.com/addon/html5video 같은 addon 써야할듯... video tag 추가는 되는데 선택도 편집도 안됨..
+- 스킨 동적 변환기능
+
+### Change
+
 ## [Unreleased]
 ### Added
-- Image Embeded Save 기능 추가
+- image 파일 드래그앤드롭시 절대경로로 image 태그 연결해주는 기능 추가
+- 모든 파일 드래그앤드롭시 절대경로로 a 태그 연결해주는 기능 추가
 
 ### Changed
 - editor resize bug -> body show animation 삭제

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Image Embeded Save 기능 추가
 
 ### Changed
+- editor resize bug -> body show animation 삭제
 
 ## [0.1.3] - 2017-06-23
 ### Added
